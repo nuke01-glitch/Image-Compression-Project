@@ -135,7 +135,7 @@ if uploaded_file:
     m3.metric("DCT Quality (PSNR)", f"{p_dct:.2f} dB")
     m4.metric("Structural Similarity", f"{s_svd:.3f}")
 
-# 3. Image Comparison Display
+# --- 3. Image Comparison Display (FIXED) ---
     st.divider()
     col1, col2, col3 = st.columns(3)
     
@@ -146,32 +146,27 @@ if uploaded_file:
 
     with col2:
         st.markdown("#### SVD Output")
+        # --- FIX: Ensure we display the result here ---
         st.image(svd_res, use_container_width=True)
         
-        # --- FIXED DOWNLOAD LOGIC ---
+        # Download Buffer Logic
         buf = io.BytesIO()
-        # Create PIL image from the clipped uint8 array
         svd_img_to_save = Image.fromarray(svd_res)
-        
-        # CRITICAL: JPEG does not support Alpha channels or 'F' mode
         if svd_img_to_save.mode != 'RGB':
             svd_img_to_save = svd_img_to_save.convert('RGB')
-            
         svd_img_to_save.save(buf, format="JPEG")
         st.download_button("Download SVD Result", buf.getvalue(), "svd_compressed.jpg")
 
     with col3:
         st.markdown("#### DCT Output")
+        # --- FIX: Ensure we display the result here ---
         st.image(dct_res, use_container_width=True)
         
-        # --- FIXED DOWNLOAD LOGIC ---
+        # Download Buffer Logic
         buf2 = io.BytesIO()
         dct_img_to_save = Image.fromarray(dct_res)
-        
-        # CRITICAL: Convert to RGB to avoid OSError on save
         if dct_img_to_save.mode != 'RGB':
             dct_img_to_save = dct_img_to_save.convert('RGB')
-            
         dct_img_to_save.save(buf2, format="JPEG")
         st.download_button("Download DCT Result", buf2.getvalue(), "dct_compressed.jpg")
 
