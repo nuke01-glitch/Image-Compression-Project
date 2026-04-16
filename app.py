@@ -147,17 +147,30 @@ if uploaded_file:
     with col2:
         st.markdown("#### SVD Output")
         st.image(svd_res, use_container_width=True)
-        # Download
+        
+        # --- FIXED BLOCK ---
         buf = io.BytesIO()
-        Image.fromarray(svd_res).save(buf, format="JPEG")
+        # Convert to RGB to ensure JPEG compatibility
+        svd_img = Image.fromarray(svd_res)
+        if svd_img.mode != 'RGB':
+            svd_img = svd_img.convert('RGB')
+        svd_img.save(buf, format="JPEG")
+        # -------------------
+        
         st.download_button("Download SVD Result", buf.getvalue(), "svd_compressed.jpg")
 
     with col3:
         st.markdown("#### DCT Output")
         st.image(dct_res, use_container_width=True)
-        # Download
+        
+        # --- FIXED BLOCK ---
         buf2 = io.BytesIO()
-        Image.fromarray(dct_res).save(buf2, format="JPEG")
+        dct_img = Image.fromarray(dct_res)
+        if dct_img.mode != 'RGB':
+            dct_img = dct_img.convert('RGB')
+        dct_img.save(buf2, format="JPEG")
+        # -------------------
+        
         st.download_button("Download DCT Result", buf2.getvalue(), "dct_compressed.jpg")
 
     # 4. Feature: Animation
