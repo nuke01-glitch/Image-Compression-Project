@@ -135,7 +135,7 @@ if uploaded_file:
     m3.metric("DCT Quality (PSNR)", f"{p_dct:.2f} dB")
     m4.metric("Structural Similarity", f"{s_svd:.3f}")
 
-    # 3. Image Comparison Display
+# 3. Image Comparison Display
     st.divider()
     col1, col2, col3 = st.columns(3)
     
@@ -144,40 +144,35 @@ if uploaded_file:
         st.image(img, use_container_width=True)
         st.caption("Raw Image Data")
 
-    # 3. Image Comparison Display
-    st.divider()
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        st.markdown("#### Original")
-        st.image(img, use_container_width=True)
-
     with col2:
         st.markdown("#### SVD Output")
         st.image(svd_res, use_container_width=True)
         
-        # --- THE FIX STARTS HERE ---
+        # --- FIXED DOWNLOAD LOGIC ---
         buf = io.BytesIO()
-        # Ensure we are uint8 and RGB before saving as JPEG
-        svd_download = Image.fromarray(svd_res)
-        if svd_download.mode != 'RGB':
-            svd_download = svd_download.convert('RGB')
-        svd_download.save(buf, format="JPEG")
-        # --- THE FIX ENDS HERE ---
+        # Create PIL image from the clipped uint8 array
+        svd_img_to_save = Image.fromarray(svd_res)
         
+        # CRITICAL: JPEG does not support Alpha channels or 'F' mode
+        if svd_img_to_save.mode != 'RGB':
+            svd_img_to_save = svd_img_to_save.convert('RGB')
+            
+        svd_img_to_save.save(buf, format="JPEG")
         st.download_button("Download SVD Result", buf.getvalue(), "svd_compressed.jpg")
 
     with col3:
         st.markdown("#### DCT Output")
         st.image(dct_res, use_container_width=True)
         
-        # --- APPLY SAME FIX FOR DCT ---
+        # --- FIXED DOWNLOAD LOGIC ---
         buf2 = io.BytesIO()
-        dct_download = Image.fromarray(dct_res)
-        if dct_download.mode != 'RGB':
-            dct_download = dct_download.convert('RGB')
-        dct_download.save(buf2, format="JPEG")
+        dct_img_to_save = Image.fromarray(dct_res)
         
+        # CRITICAL: Convert to RGB to avoid OSError on save
+        if dct_img_to_save.mode != 'RGB':
+            dct_img_to_save = dct_img_to_save.convert('RGB')
+            
+        dct_img_to_save.save(buf2, format="JPEG")
         st.download_button("Download DCT Result", buf2.getvalue(), "dct_compressed.jpg")
 
     # 4. Feature: Animation
